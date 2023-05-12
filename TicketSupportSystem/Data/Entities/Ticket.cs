@@ -10,8 +10,8 @@ namespace TicketSupportSystem.Data.Entities
         public Priority Priority { get; set; }
         public Status Status { get; set; }
         public DateTimeOffset CreatedAt { get; set; }
-        public DateTimeOffset UpdatedAt { get; set; }
-        public DateTimeOffset ClosedAt { get; set; }
+        public DateTimeOffset? UpdatedAt { get; set; }
+        public DateTimeOffset? ClosedAt { get; set; }
         public Guid UserId { get; set; }
         public Guid AssignedToId { get; set; }
         public User User { get; set; } = null!;
