@@ -3,20 +3,21 @@ using TicketSupportSystem.Data.Entities;
 using TicketSupportSystem.DTOs.Requests;
 using TicketSupportSystem.DTOs.Responses;
 using TicketSupportSystem.Interfaces;
-using System.Security.Cryptography;
-using System.Text;
 using TicketSupportSystem.Common.Exceptions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 
 namespace TicketSupportSystem.Services
 {
     public class UsersService : IUsersService
     {
         private readonly TicketSupportSystemContext _context;
+        private readonly IPasswordHasher<User> _passwordHasher;
 
-        public UsersService(TicketSupportSystemContext context)
+        public UsersService(TicketSupportSystemContext context, IPasswordHasher<User> passwordHasher)
         {
             _context = context;
+            _passwordHasher = passwordHasher;
         }
 
         public async Task<Guid> CreateUser(CreateUserDTO userDTO)
@@ -27,15 +28,12 @@ namespace TicketSupportSystem.Services
                 throw new ConflictException();
             }
 
-            var md5 = MD5.Create();
-            var passwordHash = md5.ComputeHash(Encoding.UTF8.GetBytes(userDTO.Password));
-
             var newUser = new User
             {
                 Id = new Guid(),
                 Name = userDTO.Name,
                 Email = userDTO.Email,
-                Password = Convert.ToBase64String(passwordHash)
+                Password = _passwordHasher.HashPassword(null, userDTO.Password)
             };
             _context.Add(newUser);
             await _context.SaveChangesAsync();
@@ -102,12 +100,9 @@ namespace TicketSupportSystem.Services
                 throw new ConflictException();
             }
 
-            var md5 = MD5.Create();
-            var passwordHash = md5.ComputeHash(Encoding.UTF8.GetBytes(userDTO.Password));
-
             user.Name = userDTO.Name;
             user.Email = userDTO.Email;
-            user.Password = Convert.ToBase64String(passwordHash);
+            user.Password = _passwordHasher.HashPassword(null, userDTO.Password);
 
             await _context.SaveChangesAsync();
         }

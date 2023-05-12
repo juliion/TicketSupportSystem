@@ -1,5 +1,8 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using ScottBrady91.AspNetCore.Identity;
 using TicketSupportSystem.Data;
+using TicketSupportSystem.Data.Entities;
 using TicketSupportSystem.Interfaces;
 using TicketSupportSystem.Services;
 
@@ -15,6 +18,7 @@ builder.Services.AddDbContext<TicketSupportSystemContext>(options => options.Use
 
 builder.Services.AddScoped<IUsersService, UsersService>();
 builder.Services.AddScoped<ITicketsService, TicketsService>();
+builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 
 var app = builder.Build();
 
