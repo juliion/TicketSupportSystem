@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
+using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Text;
 using TicketSupportSystem.Common.Exceptions;
@@ -14,23 +16,18 @@ namespace TicketSupportSystem.Services
     public class TicketsService : ITicketsService
     {
         private readonly TicketSupportSystemContext _context;
-
-        public TicketsService(TicketSupportSystemContext context)
+        private readonly IMapper _mapper;
+        public TicketsService(TicketSupportSystemContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
         public async Task<Guid> CreateTicket(CreateTicketDTO ticketDTO)
         {
-            var newTicket = new Ticket
-            {
-                Id = new Guid(),
-                Title = ticketDTO.Title,
-                Description = ticketDTO.Description,
-                Priority = ticketDTO.Priority,
-                Status = Status.Open,
-                CreatedAt = DateTimeOffset.Now,
-                UserId = ticketDTO.UserId
-        };
+            var newTicket = _mapper.Map<CreateTicketDTO, Ticket>(ticketDTO);
+            newTicket.CreatedAt = DateTimeOffset.Now;
+            newTicket.Status = Status.Open;
+
             _context.Tickets.Add(newTicket);
             await _context.SaveChangesAsync();
 
@@ -60,21 +57,9 @@ namespace TicketSupportSystem.Services
                 throw new NotFoundException();
             }
 
-            return new TicketDTO
-            {
-                Id = ticket.Id,
-                Title = ticket.Title,
-                Description = ticket.Description,
-                Priority = ticket.Priority,
-                Status = ticket.Status,
-                CreatedAt = ticket.CreatedAt,
-                UpdatedAt = ticket.UpdatedAt,
-                ClosedAt = ticket.ClosedAt,
-                UserName = ticket.User.Name,
-                UserEmail = ticket.User.Email,
-                AssignedToEmail = ticket.AssignedTo?.Name,
-                AssignedToName = ticket.AssignedTo?.Email
-            };
+            var ticketDto = _mapper.Map<Ticket, TicketDTO>(ticket);
+
+            return ticketDto;
         }
 
         public async Task<IEnumerable<TicketDTO>> GetTickets()
@@ -82,27 +67,9 @@ namespace TicketSupportSystem.Services
             var tickets = await _context.Tickets
                 .Include(ticket => ticket.User)
                 .Include(ticket => ticket.AssignedTo)
-                .ToListAsync();
+            .ToListAsync();
 
-            var ticketsDTOs = new List<TicketDTO>();
-            foreach (var ticket in tickets)
-            {
-                ticketsDTOs.Add(new TicketDTO
-                {
-                    Id = ticket.Id,
-                    Title = ticket.Title,
-                    Description = ticket.Description,
-                    Priority = ticket.Priority,
-                    Status = ticket.Status,
-                    CreatedAt = ticket.CreatedAt,
-                    UpdatedAt = ticket.UpdatedAt,
-                    ClosedAt = ticket.ClosedAt,
-                    UserName = ticket.User.Name,
-                    UserEmail = ticket.User.Email,
-                    AssignedToEmail = ticket.AssignedTo?.Name,
-                    AssignedToName = ticket.AssignedTo?.Email
-                });
-            }
+            var ticketsDTOs = _mapper.Map<List<Ticket>, List<TicketDTO>>(tickets);
 
             return ticketsDTOs;
         }

@@ -6,6 +6,8 @@ using TicketSupportSystem.Interfaces;
 using TicketSupportSystem.Common.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
+using AutoMapper;
+using Microsoft.AspNet.Identity;
 
 namespace TicketSupportSystem.Services
 {
@@ -13,11 +15,13 @@ namespace TicketSupportSystem.Services
     {
         private readonly TicketSupportSystemContext _context;
         private readonly IPasswordHasher<User> _passwordHasher;
+        private readonly IMapper _mapper;
 
-        public UsersService(TicketSupportSystemContext context, IPasswordHasher<User> passwordHasher)
+        public UsersService(TicketSupportSystemContext context, IPasswordHasher<User> passwordHasher, IMapper mapper)
         {
             _context = context;
             _passwordHasher = passwordHasher;
+            _mapper= mapper;
         }
 
         public async Task<Guid> CreateUser(CreateUserDTO userDTO)
@@ -28,13 +32,9 @@ namespace TicketSupportSystem.Services
                 throw new ConflictException();
             }
 
-            var newUser = new User
-            {
-                Id = new Guid(),
-                Name = userDTO.Name,
-                Email = userDTO.Email,
-                Password = _passwordHasher.HashPassword(null, userDTO.Password)
-            };
+            var newUser = _mapper.Map<CreateUserDTO, User>(userDTO);
+            newUser.Password = _passwordHasher.HashPassword(null, userDTO.Password);
+
             _context.Add(newUser);
             await _context.SaveChangesAsync();
 
@@ -60,28 +60,16 @@ namespace TicketSupportSystem.Services
                 throw new NotFoundException();
             }
 
-            return new UserDTO
-            {
-                Id = user.Id,
-                Name = user.Name,
-                Email = user.Email
-            };
+            var userDto = _mapper.Map<User, UserDTO>(user);
+
+            return userDto;
         }
 
         public async Task<IEnumerable<UserDTO>> GetUsers()
         {
             var users = await _context.Users.ToListAsync();
 
-            var usersDTOs = new List<UserDTO>();
-            foreach (var user in users)
-            {
-                usersDTOs.Add(new UserDTO
-                {
-                    Id = user.Id,
-                    Name = user.Name,
-                    Email = user.Email
-                });
-            }
+            var usersDTOs = _mapper.Map<List<User>, List<UserDTO>>(users);
 
             return usersDTOs;
         }

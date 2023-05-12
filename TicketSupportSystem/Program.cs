@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using ScottBrady91.AspNetCore.Identity;
+using TicketSupportSystem.Common.Mappings;
 using TicketSupportSystem.Data;
 using TicketSupportSystem.Data.Entities;
 using TicketSupportSystem.Interfaces;
@@ -15,6 +15,8 @@ builder.Services.AddSwaggerGen();
 
 string connection = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<TicketSupportSystemContext>(options => options.UseSqlServer(connection));
+
+builder.Services.AddAutoMapper(typeof(TicketSupportSystemProfile));
 
 builder.Services.AddScoped<IUsersService, UsersService>();
 builder.Services.AddScoped<ITicketsService, TicketsService>();
