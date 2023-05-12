@@ -14,6 +14,7 @@ string connection = builder.Configuration.GetConnectionString("DefaultConnection
 builder.Services.AddDbContext<TicketSupportSystemContext>(options => options.UseSqlServer(connection));
 
 builder.Services.AddScoped<IUsersService, UsersService>();
+builder.Services.AddScoped<ITicketsService, TicketsService>();
 
 var app = builder.Build();
 
