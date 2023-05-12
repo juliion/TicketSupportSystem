@@ -64,6 +64,7 @@ namespace TicketSupportSystem.Services
 
             return new UserDTO
             {
+                Id = user.Id,
                 Name = user.Name,
                 Email = user.Email
             };
@@ -78,6 +79,7 @@ namespace TicketSupportSystem.Services
             {
                 usersDTOs.Add(new UserDTO
                 {
+                    Id = user.Id,
                     Name = user.Name,
                     Email = user.Email
                 });
