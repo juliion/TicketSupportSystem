@@ -1,11 +1,11 @@
-﻿namespace TicketSupportSystem.Data.Entities
+﻿using Microsoft.AspNetCore.Identity;
+
+namespace TicketSupportSystem.Data.Entities
 {
-    public class User
+    public class User : IdentityUser<Guid>
     {
-        public Guid Id { get; set; }
         public string Name { get; set; } = null!;
-        public string Email { get; set; } = null!;
-        public string Password { get; set; } = null!;
+        public string Surname { get; set; } = null!;
         public List<Ticket> CreatedTickets { get; set; } = new List<Ticket>();
         public List<Ticket> AssignedTickets { get; set; } = new List<Ticket>();
     }

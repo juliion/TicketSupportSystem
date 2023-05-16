@@ -12,12 +12,7 @@ namespace TicketSupportSystem.Data.Configurations
             builder.Property(user => user.Name)
                 .HasMaxLength(100)
                 .IsRequired();
-            builder.HasIndex(user => user.Email)
-                   .IsUnique();
-            builder.Property(user => user.Email)
-                .HasMaxLength(100)
-                .IsRequired();
-            builder.Property(user => user.Password)
+            builder.Property(user => user.Surname)
                 .HasMaxLength(100)
                 .IsRequired();
             builder.HasMany(user => user.CreatedTickets)
