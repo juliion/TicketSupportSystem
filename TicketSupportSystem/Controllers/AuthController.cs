@@ -38,6 +38,7 @@ namespace TicketSupportSystem.Controllers
 
             if (result.Succeeded)
             {
+                await _userManager.AddToRoleAsync(user, "Customer");
                 await _signInManager.SignInAsync(user, isPersistent: false);
                 return Ok(user.Id);
             }
@@ -49,7 +50,7 @@ namespace TicketSupportSystem.Controllers
         public async Task<IActionResult> Login(UserLoginDTO userLoginDTO)
         {
 
-            var user = await _userManager.FindByNameAsync(userLoginDTO.Email);
+            var user = await _userManager.FindByEmailAsync(userLoginDTO.Email);
 
             if (user != null && await _userManager.CheckPasswordAsync(user, userLoginDTO.Password))
             {
