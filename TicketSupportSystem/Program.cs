@@ -55,6 +55,7 @@ builder.Services.AddAuthentication(opt =>
 builder.Services.AddAutoMapper(typeof(TicketSupportSystemProfile));
 
 builder.Services.AddScoped<ITicketsService, TicketsService>();
+builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 
 var app = builder.Build();
 

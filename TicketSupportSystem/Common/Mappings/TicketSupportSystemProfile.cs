@@ -9,7 +9,7 @@ namespace TicketSupportSystem.Common.Mappings
     {
         public TicketSupportSystemProfile()
         {
-            CreateMap<CreateUserDTO, User>();
+            CreateMap<UserRegistrationDTO, User>();
             CreateMap<User, UserDTO>();
 
             CreateMap<CreateTicketDTO, Ticket>();
