@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TicketSupportSystem.Common.Exceptions;
 using TicketSupportSystem.DTOs.Requests;
@@ -8,6 +9,7 @@ namespace TicketSupportSystem.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class TicketsController : ControllerBase
     {
         private readonly ITicketsService _ticketsService;
@@ -18,6 +20,7 @@ namespace TicketSupportSystem.Controllers
         }
 
         [HttpGet("GetTickets")]
+        [Authorize(Roles = "Admin,SupportAgent")]
         public async Task<IActionResult> GetTickets()
         {
             var tickets = await _ticketsService.GetTickets();
@@ -64,6 +67,8 @@ namespace TicketSupportSystem.Controllers
         }
 
         [HttpDelete("DeleteTicket/{id}")]
+        [Authorize(Roles = "Admin")]
+
         public async Task<IActionResult> DeleteTicket(Guid id)
         {
             try
