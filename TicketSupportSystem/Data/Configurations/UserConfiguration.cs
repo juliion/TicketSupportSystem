@@ -24,6 +24,11 @@ namespace TicketSupportSystem.Data.Configurations
                 .WithOne(ticket => ticket.AssignedTo)
                 .HasForeignKey(ticket => ticket.AssignedToId)
                 .OnDelete(DeleteBehavior.Restrict);
+            builder.HasMany(user => user.Comments)
+                 .WithOne(comment => comment.User)
+                 .HasForeignKey(comment => comment.UserId)
+                 .IsRequired()
+                 .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

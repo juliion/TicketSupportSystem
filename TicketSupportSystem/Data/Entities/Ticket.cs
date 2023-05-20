@@ -16,6 +16,7 @@ namespace TicketSupportSystem.Data.Entities
         public Guid? AssignedToId { get; set; }
         public User User { get; set; } = null!;
         public User? AssignedTo { get; set; }
+        public List<Comment> Comments { get; set; } = new List<Comment>();
 
     }
 }

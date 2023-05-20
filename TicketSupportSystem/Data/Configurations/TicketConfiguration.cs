@@ -19,6 +19,11 @@ namespace TicketSupportSystem.Data.Configurations
                     .IsRequired();
             builder.Property(ticket => ticket.CreatedAt)
                     .IsRequired();
+            builder.HasMany(user => user.Comments)
+                 .WithOne(comment => comment.Ticket)
+                 .HasForeignKey(comment => comment.TicketId)
+                 .IsRequired()
+                 .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }
