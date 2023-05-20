@@ -9,5 +9,6 @@ namespace TicketSupportSystem.DTOs.Requests
         public Priority Priority { get; set; }
         public Status Status { get; set; }
         public Guid? AssignedToId { get; set; }
+        public Guid UserId { get; set; }
     }
 }

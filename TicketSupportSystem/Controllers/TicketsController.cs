@@ -1,9 +1,14 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TicketSupportSystem.Common.Exceptions;
+using TicketSupportSystem.Data.Entities;
 using TicketSupportSystem.DTOs.Requests;
 using TicketSupportSystem.Interfaces;
+using System.Net.Sockets;
+using System.Security.Claims;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace TicketSupportSystem.Controllers
 {
@@ -13,10 +18,12 @@ namespace TicketSupportSystem.Controllers
     public class TicketsController : ControllerBase
     {
         private readonly ITicketsService _ticketsService;
+        private readonly UserManager<User> _userManager;
 
-        public TicketsController(ITicketsService ticketsService)
+        public TicketsController(ITicketsService ticketsService, UserManager<User> userManager)
         {
             _ticketsService = ticketsService;
+            _userManager = userManager;
         }
 
         [HttpGet("GetTickets")]
@@ -34,6 +41,16 @@ namespace TicketSupportSystem.Controllers
             try
             {
                 var ticket = await _ticketsService.GetTicket(id);
+
+                var currentUserEmail = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+                var user = await _userManager.FindByEmailAsync(currentUserEmail);
+                var isCustomer = await _userManager.IsInRoleAsync(user, "Customer");
+
+                if (isCustomer && ticket.UserId != user.Id)
+                {
+                    return Forbid();
+                }
 
                 return Ok(ticket);
             }
@@ -56,6 +73,16 @@ namespace TicketSupportSystem.Controllers
         {
             try
             {
+                var currentUserEmail = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+                var user = await _userManager.FindByEmailAsync(currentUserEmail);
+                var isCustomer = await _userManager.IsInRoleAsync(user, "Customer");
+
+                if (isCustomer && ticketDTO.UserId != user.Id)
+                {
+                    return Forbid();
+                }
+
                 await _ticketsService.UpdateTicket(id, ticketDTO);
 
                 return Ok();
