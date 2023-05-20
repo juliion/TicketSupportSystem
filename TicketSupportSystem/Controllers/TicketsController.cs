@@ -9,6 +9,9 @@ using TicketSupportSystem.Interfaces;
 using System.Net.Sockets;
 using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
+using TicketSupportSystem.Services;
+using TicketSupportSystem.DTOs.Responses;
+using System.Xml.Linq;
 
 namespace TicketSupportSystem.Controllers
 {
@@ -19,11 +22,13 @@ namespace TicketSupportSystem.Controllers
     {
         private readonly ITicketsService _ticketsService;
         private readonly UserManager<User> _userManager;
+        private readonly ICommentsService _commentsService;
 
-        public TicketsController(ITicketsService ticketsService, UserManager<User> userManager)
+        public TicketsController(ITicketsService ticketsService, UserManager<User> userManager, ICommentsService commentsService)
         {
             _ticketsService = ticketsService;
             _userManager = userManager;
+            _commentsService = commentsService;
         }
 
         [HttpGet("GetTickets")]
@@ -108,6 +113,43 @@ namespace TicketSupportSystem.Controllers
             {
                 return NotFound();
             }
+        }
+
+
+        [HttpPost("Comments/AddCommentToTicket")]
+
+        public async Task<IActionResult> CreateComment(CreateCommentDTO commentDTO)
+        {
+            var commentId = await _commentsService.CreateComment(commentDTO);
+
+            return Ok(commentId);
+        }
+
+        [HttpGet("Comments/GetCommentsToTicket/{ticketId}")]
+        public async Task<IActionResult> GetCommentsToTicket(Guid ticketId)
+        {
+
+            var currentUserEmail = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            var user = await _userManager.FindByEmailAsync(currentUserEmail);
+            var isCustomer = await _userManager.IsInRoleAsync(user, "Customer");
+
+
+            if (isCustomer && user.CreatedTickets.FirstOrDefault(t => t.Id == ticketId) == null)
+            {
+                return Forbid();
+            }
+
+            try
+            {
+               var comments  = await _commentsService.GetCommentsToTicket(ticketId);
+               return Ok(comments);
+            }
+            catch (NotFoundException)
+            {
+                return NotFound();
+            }
+
         }
     }
 }

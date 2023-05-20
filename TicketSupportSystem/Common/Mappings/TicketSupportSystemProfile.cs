@@ -12,6 +12,12 @@ namespace TicketSupportSystem.Common.Mappings
             CreateMap<UserRegistrationDTO, User>();
             CreateMap<User, UserDTO>();
 
+            CreateMap<CreateCommentDTO, Comment>();
+            CreateMap<Comment, CommentDTO>()
+                .ForMember(dest => dest.UserEmail, opt => opt.MapFrom(src => src.User.Email))
+                .ForMember(dest => dest.TicketTitle, opt => opt.MapFrom(src => src.Ticket.Title));
+
+
             CreateMap<CreateTicketDTO, Ticket>();
             CreateMap<Ticket, TicketDTO>()
                 .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User.Name))
