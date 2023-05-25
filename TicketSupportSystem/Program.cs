@@ -56,6 +56,7 @@ builder.Services.AddAutoMapper(typeof(TicketSupportSystemProfile));
 
 builder.Services.AddScoped<ITicketsService, TicketsService>();
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
+builder.Services.AddScoped<ICommentsService, CommentsService>();
 
 var app = builder.Build();
 

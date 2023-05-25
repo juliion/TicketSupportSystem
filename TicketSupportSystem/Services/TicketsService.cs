@@ -50,6 +50,7 @@ namespace TicketSupportSystem.Services
             var tickets = await _context.Tickets
                 .Include(ticket => ticket.User)
                 .Include(ticket => ticket.AssignedTo)
+                .Include(ticket => ticket.Comments)
                 .ToListAsync();
             var ticket = tickets.FirstOrDefault(t => t.Id == id);
             if (ticket == null)
@@ -67,7 +68,8 @@ namespace TicketSupportSystem.Services
             var tickets = await _context.Tickets
                 .Include(ticket => ticket.User)
                 .Include(ticket => ticket.AssignedTo)
-            .ToListAsync();
+                .Include(ticket => ticket.Comments)
+                .ToListAsync();
 
             var ticketsDTOs = _mapper.Map<List<Ticket>, List<TicketDTO>>(tickets);
 

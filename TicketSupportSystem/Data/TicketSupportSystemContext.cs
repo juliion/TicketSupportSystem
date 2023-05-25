@@ -9,6 +9,7 @@ namespace TicketSupportSystem.Data
     public class TicketSupportSystemContext : IdentityDbContext<User, Role, Guid>
     {
         public DbSet<Ticket> Tickets { get; set; }
+        public DbSet<Comment> Comments { get; set; }
         public TicketSupportSystemContext(DbContextOptions<TicketSupportSystemContext> opt)
             : base(opt) { }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
