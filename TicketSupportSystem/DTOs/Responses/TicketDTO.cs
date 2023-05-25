@@ -1,4 +1,5 @@
-﻿using TicketSupportSystem.Data.Enums;
+﻿using TicketSupportSystem.Data.Entities;
+using TicketSupportSystem.Data.Enums;
 
 namespace TicketSupportSystem.DTOs.Responses
 {
@@ -17,5 +18,6 @@ namespace TicketSupportSystem.DTOs.Responses
         public string UserEmail { get; set; } = null!;
         public string? AssignedToName { get; set; }
         public string? AssignedToEmail { get; set; }
+        public List<CommentDTO> Comments { get; set; } = null!;
     }
 }
