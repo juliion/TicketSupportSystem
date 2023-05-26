@@ -151,6 +151,11 @@ namespace TicketSupportSystem.Services
             ticket.UpdatedAt = DateTimeOffset.Now;
             ticket.AssignedToId = ticketDTO.AssignedToId;
 
+            if(ticketDTO.Status == Status.Closed)
+            {
+                ticket.ClosedAt = DateTimeOffset.Now;
+            }
+
             await _context.SaveChangesAsync();
         }
     }
