@@ -96,6 +96,10 @@ namespace TicketSupportSystem.Controllers
             {
                 return NotFound();
             }
+            catch (ForbiddenException)
+            {
+                return Forbid();
+            }
         }
 
         [HttpDelete("DeleteTicket/{id}")]

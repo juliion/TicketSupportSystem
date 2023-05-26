@@ -144,6 +144,11 @@ namespace TicketSupportSystem.Services
                 throw new NotFoundException();
             }
 
+            if (ticket.Status == Status.Closed)
+            {
+                throw new ForbiddenException();
+            }
+
             ticket.Title = ticketDTO.Title;
             ticket.Description = ticketDTO.Description;
             ticket.Priority = ticketDTO.Priority;
