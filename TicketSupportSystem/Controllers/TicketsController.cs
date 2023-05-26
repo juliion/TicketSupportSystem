@@ -33,9 +33,9 @@ namespace TicketSupportSystem.Controllers
 
         [HttpGet("GetTickets")]
         [Authorize(Roles = "Admin,SupportAgent")]
-        public async Task<IActionResult> GetTickets()
+        public async Task<IActionResult> GetTickets([FromQuery]TicketsQueryFilters filters)
         {
-            var tickets = await _ticketsService.GetTickets();
+            var tickets = await _ticketsService.GetTickets(filters);
 
             return Ok(tickets);
         }
