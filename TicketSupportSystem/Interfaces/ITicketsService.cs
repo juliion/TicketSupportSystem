@@ -11,6 +11,6 @@ namespace TicketSupportSystem.Interfaces
         public Task UpdateTicket(Guid id, UpdateTicketDTO ticketDTO);
         public Task DeleteTicket(Guid id);
         public Task<FilteredTicketsDTO> GetTickets(TicketsQueryFilters filters);
-        public Task<TicketDTO> GetTicket(Guid id);
+        public Task<TicketDetailsDTO> GetTicket(Guid id);
     }
 }

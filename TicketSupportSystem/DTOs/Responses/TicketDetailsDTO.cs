@@ -1,11 +1,10 @@
-﻿using TicketSupportSystem.Data.Entities;
-using TicketSupportSystem.Data.Enums;
+﻿using TicketSupportSystem.Data.Enums;
 
 namespace TicketSupportSystem.DTOs.Responses
 {
-    public class TicketDTO
+    public class TicketDetailsDTO
     {
-        public Guid Id { get; set; } 
+        public Guid Id { get; set; }
         public string Title { get; set; } = null!;
         public string Description { get; set; } = null!;
         public Priority Priority { get; set; }
@@ -18,5 +17,6 @@ namespace TicketSupportSystem.DTOs.Responses
         public string UserEmail { get; set; } = null!;
         public string? AssignedToName { get; set; }
         public string? AssignedToEmail { get; set; }
+        public List<CommentDTO> Comments { get; set; } = null!;
     }
 }

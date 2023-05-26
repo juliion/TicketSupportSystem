@@ -48,7 +48,7 @@ namespace TicketSupportSystem.Services
             await _context.SaveChangesAsync();
         }
 
-        public async Task<TicketDTO> GetTicket(Guid id)
+        public async Task<TicketDetailsDTO> GetTicket(Guid id)
         {
             var tickets = await _context.Tickets
                 .Include(ticket => ticket.User)
@@ -61,7 +61,7 @@ namespace TicketSupportSystem.Services
                 throw new NotFoundException();
             }
 
-            var ticketDto = _mapper.Map<Ticket, TicketDTO>(ticket);
+            var ticketDto = _mapper.Map<Ticket, TicketDetailsDTO>(ticket);
 
             return ticketDto;
         }
