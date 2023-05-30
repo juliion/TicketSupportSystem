@@ -83,7 +83,7 @@ namespace TicketSupportSystem.Controllers
                 var user = await _userManager.FindByEmailAsync(currentUserEmail);
                 var isCustomer = await _userManager.IsInRoleAsync(user, "Customer");
 
-                if (isCustomer && ticketDTO.UserId != user.Id)
+                if (isCustomer && user.CreatedTickets.FirstOrDefault(t => t.Id == id) == null)
                 {
                     return Forbid();
                 }
