@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -9,6 +10,7 @@ using TicketSupportSystem.DTOs.Requests;
 using TicketSupportSystem.DTOs.Responses;
 using TicketSupportSystem.Interfaces;
 using TicketSupportSystem.Services;
+using TicketSupportSystem.Validators;
 
 namespace TicketSupportSystem.Controllers
 {
@@ -19,16 +21,22 @@ namespace TicketSupportSystem.Controllers
     {
         private readonly ICommentsService _commentsService;
         private readonly UserManager<User> _userManager;
+        private IValidator<UpdateCommentDTO> _updateCommentValidator;
 
-        public CommentsController(ICommentsService commentsService, UserManager<User> userManager)
+        public CommentsController(ICommentsService commentsService, UserManager<User> userManager, IValidator<UpdateCommentDTO> updateCommentValidator)
         {
             _commentsService = commentsService;
             _userManager = userManager;
+            _updateCommentValidator = updateCommentValidator;
         }
 
         [HttpPut("UpdateComment/{id}")]
         public async Task<IActionResult> UpdateComment(Guid id, UpdateCommentDTO commentDTO)
         {
+            var validationRes = _updateCommentValidator.Validate(commentDTO);
+            if (!validationRes.IsValid)
+                return BadRequest(validationRes);
+
             try
             {
                 var currentUserEmail = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
