@@ -1,6 +1,9 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.SqlServer.Query.Internal;
+using System.Linq.Expressions;
 using System.Net.Sockets;
+using System.Reflection.Metadata;
 using System.Security.Cryptography;
 using System.Text;
 using TicketSupportSystem.Common.Exceptions;
@@ -45,7 +48,7 @@ namespace TicketSupportSystem.Services
             await _context.SaveChangesAsync();
         }
 
-        public async Task<TicketDTO> GetTicket(Guid id)
+        public async Task<TicketDetailsDTO> GetTicket(Guid id)
         {
             var tickets = await _context.Tickets
                 .Include(ticket => ticket.User)
@@ -58,22 +61,79 @@ namespace TicketSupportSystem.Services
                 throw new NotFoundException();
             }
 
-            var ticketDto = _mapper.Map<Ticket, TicketDTO>(ticket);
+            var ticketDto = _mapper.Map<Ticket, TicketDetailsDTO>(ticket);
 
             return ticketDto;
         }
 
-        public async Task<IEnumerable<TicketDTO>> GetTickets()
+        private async Task<FilteredTicketsDTO> ApplyFilters(TicketsQueryFilters filters)
         {
-            var tickets = await _context.Tickets
+            var query = _context.Tickets
                 .Include(ticket => ticket.User)
                 .Include(ticket => ticket.AssignedTo)
                 .Include(ticket => ticket.Comments)
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(filters.SortColumn) && !string.IsNullOrWhiteSpace(filters.Order))
+            {
+                if (filters.Order == "asc")
+                {
+                    query = query.OrderBy(e => EF.Property<object>(e, filters.SortColumn));
+                }
+                else if (filters.Order == "desc")
+                {
+                    query = query.OrderByDescending(e => EF.Property<object>(e, filters.SortColumn));
+                }
+            }
+
+            if(filters.Priority != null)
+            {
+                query = query.Where(t => t.Priority == filters.Priority);
+            }
+
+            if (filters.Status != null)
+            {
+                query = query.Where(t => t.Status == filters.Status);
+            }
+
+            if (filters.UserId != null)
+            {
+                query = query.Where(t => t.UserId == filters.UserId);
+            }
+
+            if (filters.AsignedToId != null)
+            {
+                query = query.Where(t => t.AssignedToId == filters.AsignedToId);
+            }
+
+            var total = await query.CountAsync();
+            var take = filters.Take;
+            var skip = filters.Skip;
+
+            var tickets = await query
+                .Skip(skip)
+                .Take(take)
                 .ToListAsync();
 
             var ticketsDTOs = _mapper.Map<List<Ticket>, List<TicketDTO>>(tickets);
 
-            return ticketsDTOs;
+
+            var filteredTickets = new FilteredTicketsDTO
+            {
+                Take = take,
+                Skip = skip,
+                Total = total,
+                Tickets = ticketsDTOs
+            };
+
+            return filteredTickets;
+        } 
+
+        public async Task<FilteredTicketsDTO> GetTickets(TicketsQueryFilters filters)
+        {
+            var filteredTickets = await ApplyFilters(filters);
+
+            return filteredTickets;
         }
 
         public async Task UpdateTicket(Guid id, UpdateTicketDTO ticketDTO)
@@ -84,12 +144,22 @@ namespace TicketSupportSystem.Services
                 throw new NotFoundException();
             }
 
+            if (ticket.Status == Status.Closed)
+            {
+                throw new ForbiddenException();
+            }
+
             ticket.Title = ticketDTO.Title;
             ticket.Description = ticketDTO.Description;
             ticket.Priority = ticketDTO.Priority;
             ticket.Status = ticketDTO.Status;
             ticket.UpdatedAt = DateTimeOffset.Now;
             ticket.AssignedToId = ticketDTO.AssignedToId;
+
+            if(ticketDTO.Status == Status.Closed)
+            {
+                ticket.ClosedAt = DateTimeOffset.Now;
+            }
 
             await _context.SaveChangesAsync();
         }

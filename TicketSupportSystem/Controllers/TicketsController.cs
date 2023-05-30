@@ -12,6 +12,8 @@ using System.IdentityModel.Tokens.Jwt;
 using TicketSupportSystem.Services;
 using TicketSupportSystem.DTOs.Responses;
 using System.Xml.Linq;
+using FluentValidation;
+using TicketSupportSystem.Validators;
 
 namespace TicketSupportSystem.Controllers
 {
@@ -23,19 +25,25 @@ namespace TicketSupportSystem.Controllers
         private readonly ITicketsService _ticketsService;
         private readonly UserManager<User> _userManager;
         private readonly ICommentsService _commentsService;
+        private IValidator<CreateCommentDTO> _createCommentValidator;
+        private IValidator<CreateTicketDTO> _createTicketValidator;
+        private IValidator<UpdateTicketDTO> _updateTicketValidator;
 
-        public TicketsController(ITicketsService ticketsService, UserManager<User> userManager, ICommentsService commentsService)
+        public TicketsController(ITicketsService ticketsService, UserManager<User> userManager, ICommentsService commentsService, IValidator<CreateTicketDTO> createTicketValidator, IValidator<UpdateTicketDTO> updateTicketValidator, IValidator<CreateCommentDTO> createCommentValidator)
         {
             _ticketsService = ticketsService;
             _userManager = userManager;
             _commentsService = commentsService;
+            _createTicketValidator = createTicketValidator;
+            _createCommentValidator = createCommentValidator;
+            _updateTicketValidator = updateTicketValidator;
         }
 
         [HttpGet("GetTickets")]
         [Authorize(Roles = "Admin,SupportAgent")]
-        public async Task<IActionResult> GetTickets()
+        public async Task<IActionResult> GetTickets([FromQuery]TicketsQueryFilters filters)
         {
-            var tickets = await _ticketsService.GetTickets();
+            var tickets = await _ticketsService.GetTickets(filters);
 
             return Ok(tickets);
         }
@@ -68,6 +76,10 @@ namespace TicketSupportSystem.Controllers
         [HttpPost("CreateTicket")]
         public async Task<IActionResult> CreateTicket(CreateTicketDTO ticketDTO)
         {
+            var validationRes = _createTicketValidator.Validate(ticketDTO);
+            if (!validationRes.IsValid)
+                return BadRequest(validationRes);
+
             var ticketId = await _ticketsService.CreateTicket(ticketDTO);
 
             return Ok(ticketId);
@@ -76,6 +88,9 @@ namespace TicketSupportSystem.Controllers
         [HttpPut("UpdateTicket/{id}")]
         public async Task<IActionResult> UpdateTicket(Guid id, UpdateTicketDTO ticketDTO)
         {
+            var validationRes = _updateTicketValidator.Validate(ticketDTO);
+            if (!validationRes.IsValid)
+                return BadRequest(validationRes);
             try
             {
                 var currentUserEmail = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -83,7 +98,7 @@ namespace TicketSupportSystem.Controllers
                 var user = await _userManager.FindByEmailAsync(currentUserEmail);
                 var isCustomer = await _userManager.IsInRoleAsync(user, "Customer");
 
-                if (isCustomer && ticketDTO.UserId != user.Id)
+                if (isCustomer && user.CreatedTickets.FirstOrDefault(t => t.Id == id) == null)
                 {
                     return Forbid();
                 }
@@ -95,6 +110,10 @@ namespace TicketSupportSystem.Controllers
             catch (NotFoundException)
             {
                 return NotFound();
+            }
+            catch (ForbiddenException)
+            {
+                return Forbid();
             }
         }
 
@@ -120,6 +139,10 @@ namespace TicketSupportSystem.Controllers
 
         public async Task<IActionResult> CreateComment(CreateCommentDTO commentDTO)
         {
+            var validationRes = _createCommentValidator.Validate(commentDTO);
+            if (!validationRes.IsValid)
+                return BadRequest(validationRes);
+
             var commentId = await _commentsService.CreateComment(commentDTO);
 
             return Ok(commentId);

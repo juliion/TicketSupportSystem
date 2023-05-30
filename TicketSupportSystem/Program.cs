@@ -9,6 +9,8 @@ using TicketSupportSystem.Data;
 using TicketSupportSystem.Data.Entities;
 using TicketSupportSystem.Interfaces;
 using TicketSupportSystem.Services;
+using TicketSupportSystem.Validators;
+using FluentValidation;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -53,6 +55,8 @@ builder.Services.AddAuthentication(opt =>
 });
 
 builder.Services.AddAutoMapper(typeof(TicketSupportSystemProfile));
+
+builder.Services.AddValidatorsFromAssemblyContaining<CreateCommentValidator>();
 
 builder.Services.AddScoped<ITicketsService, TicketsService>();
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
