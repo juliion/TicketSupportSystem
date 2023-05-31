@@ -10,13 +10,8 @@ namespace TicketSupportSystem.Data.Configurations
         {
             builder.Property(attach => attach.FileName)
                     .IsRequired();
-            builder.Property(attach => attach.ContentType)
+            builder.Property(attach => attach.Path)
                     .IsRequired();
-            builder.Property(attach => attach.Size)
-                    .IsRequired()
-                    .HasMaxLength(int.MaxValue);
-            builder.Property(attach => attach.Data)
-                   .IsRequired();
         }
     }
 }
