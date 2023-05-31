@@ -10,6 +10,7 @@ namespace TicketSupportSystem.Data
     {
         public DbSet<Ticket> Tickets { get; set; }
         public DbSet<Comment> Comments { get; set; }
+        public DbSet<Attachment> Attachments { get; set; }
         public TicketSupportSystemContext(DbContextOptions<TicketSupportSystemContext> opt)
             : base(opt) { }
         protected override void OnModelCreating(ModelBuilder modelBuilder)

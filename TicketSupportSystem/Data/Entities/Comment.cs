@@ -11,5 +11,7 @@
         public User User { get; set; } = null!;
         public Ticket Ticket { get; set; } = null!;
 
+        public List<Attachment> Attachments { get; set; } = new List<Attachment>();
+
     }
 }
