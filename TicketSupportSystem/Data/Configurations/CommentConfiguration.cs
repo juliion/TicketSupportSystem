@@ -8,10 +8,15 @@ namespace TicketSupportSystem.Data.Configurations
     {
         public void Configure(EntityTypeBuilder<Comment> builder)
         {
-            builder.Property(ticket => ticket.Text)
+            builder.Property(comment => comment.Text)
                     .IsRequired();
-            builder.Property(ticket => ticket.CreatedAt)
+            builder.Property(comment => comment.CreatedAt)
                     .IsRequired();
+            builder.HasMany(comment => comment.Attachments)
+                 .WithOne(attach => attach.Comment)
+                 .HasForeignKey(attach => attach.CommentId)
+                 .IsRequired()
+                 .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }
